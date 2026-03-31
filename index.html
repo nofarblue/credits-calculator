@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harness Cloud Credits Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="hero-section">
+        <div class="container">
+            <h1>Harness Cloud Credits Calculator</h1>
+            <p class="hero-subtitle">Estimate your cloud build costs by resource class and usage</p>
+        </div>
+    </header>
+
+    <main class="calculator-container">
+        <div class="container">
+            <div class="calculator-card">
+                <div class="calculator-header">
+                    <h2>Configure Your Runners</h2>
+                    <p>Select a resource class, enter your monthly minutes, and add to your estimate</p>
+                </div>
+
+                <div class="input-row">
+                    <div class="form-group resource-group">
+                        <label class="form-label">Resource Class</label>
+                        <select id="resource-select" class="resource-select">
+                            <!-- Populated by JS with $/min shown -->
+                        </select>
+                    </div>
+                    <div class="form-group minutes-group">
+                        <label class="form-label">Monthly Minutes</label>
+                        <input type="number" id="minutes-input" class="minutes-input" placeholder="e.g. 3000" min="0">
+                    </div>
+                    <div class="form-group btn-group">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" id="add-to-estimate" class="add-btn">Add</button>
+                    </div>
+                </div>
+
+                <!-- Runner List -->
+                <div class="runners-section" id="runners-section" style="display: none;">
+                    <div class="runners-header">
+                        <h3>Your Runners</h3>
+                    </div>
+                    <div class="runners-list" id="runners-list"></div>
+
+                    <div class="estimate-total">
+                        <div class="total-row">
+                            <span>Total Credits / month</span>
+                            <span id="total-credits">0</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Free Credits</span>
+                            <span id="free-credits">&minus;2,000</span>
+                        </div>
+                        <div class="total-row billable">
+                            <span>Billable Credits</span>
+                            <span id="billable-credits">0</span>
+                        </div>
+                        <div class="total-row cost">
+                            <span>Estimated Monthly Cost</span>
+                            <span id="monthly-cost">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>How Credits Work</h3>
+                        <ul>
+                            <li>Each minute of build time consumes credits based on resource class</li>
+                            <li>2,000 free credits per month (don't roll over)</li>
+                            <li>Purchased credits roll over month-to-month</li>
+                            <li>Overage billing available with 30-day payment terms</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3>Resource Classes</h3>
+                        <ul>
+                            <li><strong>XSmall/Small:</strong> Lightweight builds and testing</li>
+                            <li><strong>Medium/Large:</strong> Standard application builds</li>
+                            <li><strong>XLarge+:</strong> Large-scale enterprise workloads</li>
+                            <li><strong>macOS:</strong> iOS/macOS builds on Apple Silicon</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Harness Inc. All rights reserved.</p>
+            <p>Ready to get started? <a href="https://harness.io/pricing" target="_blank">View our pricing plans</a></p>
+        </div>
+    </footer>
+
+    <script type="module" src="calculator.js"></script>
+</body>
+</html>
