@@ -7,13 +7,19 @@ class HarnessCalculator {
 
         // Read version from URL hash, default to v1
         const hash = window.location.hash.replace('#', '');
-        this.version = ['v1', 'v2', 'v3'].includes(hash) ? hash : 'v1';
+        this.version = ['v1', 'v2', 'v3', 'v4'].includes(hash) ? hash : 'v1';
 
         // v3 state
         this.v3Runners = [];
         this.v3NextId = 1;
-        this.v3Os = 'linux-amd';   // default OS tab key
-        this.v3Size = null;         // selected size object
+        this.v3Os = 'linux-amd';
+        this.v3Size = null;
+
+        // v4 state
+        this.v4Runners = [];
+        this.v4NextId = 1;
+        this.v4Os = 'linux-amd';
+        this.v4Size = null;
 
         this.init();
     }
@@ -22,6 +28,7 @@ class HarnessCalculator {
         this.buildDropdown();
         this.bindEvents();
         this.v3BuildSizeGrid();
+        this.v4BuildSizeGrid();
 
         // Activate correct version tab and layout on load
         document.querySelectorAll('.version-tab').forEach(t => {
@@ -138,27 +145,84 @@ class HarnessCalculator {
         v3Slider.addEventListener('input', () => {
             const val = parseInt(v3Slider.value);
             document.getElementById('v3-speed-value').textContent = `${val}%`;
-            // Deselect presets if value doesn't match any
-            document.querySelectorAll('.v3-preset').forEach(b => {
+            document.querySelectorAll('.v3-presets .v3-preset').forEach(b => {
                 b.classList.toggle('active', parseInt(b.dataset.pct) === val);
             });
             this.v3UpdateSummary();
+        });
+
+        // ── v4 Events ────────────────────────────────────────────
+        document.getElementById('v4-os-tabs').addEventListener('click', (e) => {
+            const tab = e.target.closest('.v3-tab');
+            if (!tab) return;
+            document.querySelectorAll('#v4-os-tabs .v3-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            this.v4Os = tab.dataset.key;
+            this.v4Size = null;
+            this.v4BuildSizeGrid();
+        });
+
+        document.getElementById('v4-add').addEventListener('click', () => this.v4AddRunner());
+        document.getElementById('v4-minutes').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.v4AddRunner();
+        });
+
+        document.getElementById('v4-runners-list').addEventListener('click', (e) => {
+            const btn = e.target.closest('.runner-remove');
+            if (!btn) return;
+            this.v4Runners = this.v4Runners.filter(r => r.id !== parseInt(btn.dataset.id));
+            this.v4RenderRunners();
+        });
+
+        document.getElementById('v4-presets').addEventListener('click', (e) => {
+            const btn = e.target.closest('.v3-preset');
+            if (!btn) return;
+            document.querySelectorAll('#v4-presets .v3-preset').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const pct = parseInt(btn.dataset.pct);
+            const v4Slider = document.getElementById('v4-speed-savings');
+            v4Slider.value = pct;
+            document.getElementById('v4-speed-value').textContent = `${pct}%`;
+            this.v4UpdateSummary();
+        });
+
+        const v4Slider = document.getElementById('v4-speed-savings');
+        v4Slider.addEventListener('input', () => {
+            const val = parseInt(v4Slider.value);
+            document.getElementById('v4-speed-value').textContent = `${val}%`;
+            document.querySelectorAll('#v4-presets .v3-preset').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.pct) === val);
+            });
+            this.v4UpdateSummary();
         });
     }
 
     onVersionChange() {
         const layoutV1V2 = document.getElementById('layout-v1v2');
         const layoutV3 = document.getElementById('layout-v3');
+        const layoutV4 = document.getElementById('layout-v4');
+        const infoShared = document.getElementById('info-shared');
+
+        layoutV1V2.style.display = 'none';
+        layoutV3.style.display = 'none';
+        layoutV4.style.display = 'none';
+
+        if (this.version === 'v4') {
+            layoutV4.style.display = '';
+            infoShared.style.display = 'none'; // v4 has its own info section
+            this.v4UpdateSummary();
+            return;
+        }
+
+        infoShared.style.display = ''; // show shared info for v1/v2/v3
 
         if (this.version === 'v3') {
-            layoutV1V2.style.display = 'none';
             layoutV3.style.display = '';
             this.v3UpdateSummary();
             return;
         }
 
         layoutV1V2.style.display = '';
-        layoutV3.style.display = 'none';
 
         const intelSection = document.getElementById('intelligence-section');
         const savingsRow = document.getElementById('savings-row');
@@ -436,6 +500,163 @@ class HarnessCalculator {
         } else {
             impact.style.display = 'none';
         }
+    }
+
+    // ── v4 Methods (polished v3) ────────────────────────────────
+
+    v4GetOsArch() {
+        const map = {
+            'linux-amd': { os: 'linux', arch: 'amd' },
+            'linux-arm': { os: 'linux', arch: 'arm' },
+            'windows-amd': { os: 'windows', arch: 'amd' },
+            'macos-arm': { os: 'macos', arch: 'arm' },
+        };
+        return map[this.v4Os];
+    }
+
+    v4BuildSizeGrid() {
+        const grid = document.getElementById('v4-size-grid');
+        const { os, arch } = this.v4GetOsArch();
+        const sizes = RESOURCE_CATALOG[os]?.[arch] || [];
+
+        grid.innerHTML = sizes.map(s => {
+            const creditsPerMin = s.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
+            const costPerMin = (creditsPerMin * PRICING.COST_PER_CREDIT).toFixed(3);
+            const creditWord = creditsPerMin === 1 ? 'credit' : 'credits';
+            return `
+                <button class="v4-size-card" data-size='${JSON.stringify({ os, arch, ...s })}'>
+                    <span class="v4-size-name">${s.label}</span>
+                    <span class="v4-size-spec">${s.vcpus} vCPU · ${s.ram} GB</span>
+                    <span class="v4-size-rate">${creditsPerMin} ${creditWord} · $${costPerMin}</span>
+                </button>
+            `;
+        }).join('');
+
+        // Auto-select first card
+        const firstCard = grid.querySelector('.v4-size-card');
+        if (firstCard) {
+            firstCard.classList.add('selected');
+            this.v4Size = JSON.parse(firstCard.dataset.size);
+        }
+
+        grid.onclick = (e) => {
+            const card = e.target.closest('.v4-size-card');
+            if (!card) return;
+            grid.querySelectorAll('.v4-size-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            this.v4Size = JSON.parse(card.dataset.size);
+        };
+    }
+
+    v4AddRunner() {
+        if (!this.v4Size) {
+            this.v4FlashError('Select a size first');
+            return;
+        }
+
+        const minutesInput = document.getElementById('v4-minutes');
+        const raw = minutesInput.value.trim();
+
+        if (!raw) { this.v4FlashError('Enter monthly minutes'); return; }
+        if (!/^\d+$/.test(raw)) { this.v4FlashError('Whole numbers only'); return; }
+
+        const minutes = parseInt(raw);
+        if (minutes <= 0) { this.v4FlashError('Must be > 0'); return; }
+
+        const data = this.v4Size;
+        const creditsPerMin = data.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
+        const totalCredits = minutes * creditsPerMin;
+
+        const osLabels = { linux: 'Linux', windows: 'Windows', macos: 'macOS' };
+        const archLabels = { amd: 'x64', arm: 'ARM64' };
+
+        this.v4Runners.push({
+            id: this.v4NextId++,
+            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${data.ram} GB, ${archLabels[data.arch]})`,
+            minutes,
+            creditsPerMin,
+            totalCredits,
+        });
+
+        minutesInput.value = '1000';
+        this.v4RenderRunners();
+    }
+
+    v4RenderRunners() {
+        const section = document.getElementById('v4-runners-section');
+        const intelSection = document.getElementById('v4-intel-section');
+        const list = document.getElementById('v4-runners-list');
+
+        if (this.v4Runners.length === 0) {
+            section.style.display = 'none';
+            intelSection.style.display = 'none';
+            this.v4UpdateSummary();
+            return;
+        }
+
+        section.style.display = '';
+        intelSection.style.display = '';
+
+        list.innerHTML = this.v4Runners.map(r => {
+            const cost = r.totalCredits * PRICING.COST_PER_CREDIT;
+            return `
+                <div class="runner-row">
+                    <div class="runner-info">
+                        <span class="runner-name">${r.displayName}</span>
+                        <span class="runner-detail">${this.fmt(r.minutes)} min · ${this.fmt(r.creditsPerMin)} credits/min</span>
+                    </div>
+                    <div class="runner-cost">
+                        <span class="runner-credits">${this.fmt(r.totalCredits)} credits</span>
+                        <span class="runner-dollars">${this.fmtCurrency(cost)}</span>
+                    </div>
+                    <button class="runner-remove" data-id="${r.id}" title="Remove">&times;</button>
+                </div>
+            `;
+        }).join('');
+
+        this.v4UpdateSummary();
+    }
+
+    v4UpdateSummary() {
+        const totalCredits = this.v4Runners.reduce((sum, r) => sum + r.totalCredits, 0);
+        const savingsPct = parseInt(document.getElementById('v4-speed-savings').value) / 100;
+        const savedCredits = Math.round(totalCredits * savingsPct);
+        const effectiveCredits = totalCredits - savedCredits;
+        const billable = Math.max(0, effectiveCredits - PRICING.FREE_CREDITS_MONTHLY);
+        const cost = billable * PRICING.COST_PER_CREDIT;
+
+        document.getElementById('v4-total-credits').textContent = this.fmt(totalCredits);
+        document.getElementById('v4-hero-cost').textContent = this.fmtCurrency(cost);
+        document.getElementById('v4-free-credits').textContent = `−${this.fmt(PRICING.FREE_CREDITS_MONTHLY)}`;
+        document.getElementById('v4-billable-credits').textContent = this.fmt(billable);
+
+        const savingsRow = document.getElementById('v4-savings-row');
+        if (savedCredits > 0 && totalCredits > 0) {
+            savingsRow.style.display = '';
+            document.getElementById('v4-savings-credits').textContent = `−${this.fmt(savedCredits)}`;
+        } else {
+            savingsRow.style.display = 'none';
+        }
+
+        const impact = document.getElementById('v4-intel-impact');
+        if (totalCredits > 0 && savedCredits > 0) {
+            const savedCost = savedCredits * PRICING.COST_PER_CREDIT;
+            impact.textContent = `Saving ~${this.fmt(savedCredits)} credits (${this.fmtCurrency(savedCost)}/mo)`;
+            impact.style.display = '';
+        } else {
+            impact.style.display = 'none';
+        }
+    }
+
+    v4FlashError(msg) {
+        const btn = document.getElementById('v4-add');
+        const original = btn.textContent;
+        btn.textContent = msg;
+        btn.classList.add('error');
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.classList.remove('error');
+        }, 1500);
     }
 
     v3FlashError(msg) {

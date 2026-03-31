@@ -892,6 +892,124 @@ body {
     font-weight: bold;
 }
 
+/* ══════════════════════════════════════════════════════════════ */
+/* V4 POLISH (overrides on v3 base classes + v4-specific)        */
+/* ══════════════════════════════════════════════════════════════ */
+
+/* Size cards: larger name, clearer hierarchy */
+.v4-size-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.v4-size-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 16px 10px;
+    background: rgba(10, 14, 26, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #fff;
+    text-align: center;
+}
+
+.v4-size-card:hover {
+    border-color: rgba(6, 119, 212, 0.4);
+    background: rgba(6, 119, 212, 0.08);
+}
+
+.v4-size-card.selected {
+    border-color: #0677D4;
+    background: rgba(6, 119, 212, 0.15);
+    box-shadow: 0 0 0 1px rgba(6, 119, 212, 0.3);
+}
+
+.v4-size-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.v4-size-spec {
+    font-size: 12px;
+    opacity: 0.4;
+}
+
+.v4-size-rate {
+    font-size: 12px;
+    opacity: 0.65;
+    margin-top: 4px;
+    color: #0677D4;
+}
+
+/* Minutes + button row: wider input, trimmer button */
+.v4-minutes-row {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    margin-top: 16px;
+}
+
+.v4-minutes-field {
+    flex: 1;
+}
+
+.v4-add-btn {
+    flex-shrink: 0;
+    padding: 12px 20px;
+    font-size: 14px;
+}
+
+/* ── v4 Marketing elements ────────────────────────────────────── */
+
+.v4-subhead {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.65;
+    line-height: 1.6;
+    max-width: 680px;
+    margin: 0 auto 20px;
+}
+
+.v4-subhead a {
+    color: #b44adf;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.v4-subhead a:hover {
+    text-decoration: underline;
+}
+
+.v4-trust-bar {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.v4-trust-bar span {
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0.55;
+    padding-left: 20px;
+    position: relative;
+}
+
+.v4-trust-bar span::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0677D4;
+    font-weight: bold;
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
