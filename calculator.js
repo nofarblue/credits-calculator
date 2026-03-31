@@ -216,7 +216,7 @@ class HarnessCalculator {
             totalCredits,
         });
 
-        minutesInput.value = '';
+        minutesInput.value = '1000';
         this.renderRunners();
     }
 
@@ -367,7 +367,7 @@ class HarnessCalculator {
             totalCredits,
         });
 
-        minutesInput.value = '';
+        minutesInput.value = '1000';
         this.v3RenderRunners();
     }
 
