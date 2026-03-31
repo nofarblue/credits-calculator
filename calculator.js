@@ -51,7 +51,7 @@ class HarnessCalculator {
                     const costPerMin = (creditsPerMin * PRICING.COST_PER_CREDIT).toFixed(3);
                     const option = document.createElement('option');
                     option.value = JSON.stringify({ os, arch, ...size });
-                    option.textContent = `${size.label} (${size.vcpus} vCPU)  —  ${creditsPerMin} credits/min · $${costPerMin}/min`;
+                    option.textContent = `${size.label} (${size.vcpus} vCPU, ${size.ram} GB)  —  ${creditsPerMin} credits/min · $${costPerMin}/min`;
                     optgroup.appendChild(option);
                 }
 
@@ -210,7 +210,7 @@ class HarnessCalculator {
 
         this.runners.push({
             id: this.nextId++,
-            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${archLabels[data.arch]})`,
+            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${data.ram} GB, ${archLabels[data.arch]})`,
             minutes,
             creditsPerMin,
             totalCredits,
@@ -305,11 +305,18 @@ class HarnessCalculator {
             return `
                 <button class="v3-size-card" data-size='${JSON.stringify({ os, arch, ...s })}'>
                     <span class="v3-size-name">${s.label}</span>
-                    <span class="v3-size-spec">${s.vcpus} vCPU</span>
-                    <span class="v3-size-rate">${creditsPerMin} cr/min · $${costPerMin}/min</span>
+                    <span class="v3-size-spec">${s.vcpus} vCPU · ${s.ram} GB</span>
+                    <span class="v3-size-rate">${creditsPerMin} credits · $${costPerMin}</span>
                 </button>
             `;
         }).join('');
+
+        // Auto-select first card
+        const firstCard = grid.querySelector('.v3-size-card');
+        if (firstCard) {
+            firstCard.classList.add('selected');
+            this.v3Size = JSON.parse(firstCard.dataset.size);
+        }
 
         // Click handler via delegation
         grid.onclick = (e) => {
@@ -354,7 +361,7 @@ class HarnessCalculator {
 
         this.v3Runners.push({
             id: this.v3NextId++,
-            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${archLabels[data.arch]})`,
+            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${data.ram} GB, ${archLabels[data.arch]})`,
             minutes,
             creditsPerMin,
             totalCredits,

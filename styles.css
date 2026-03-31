@@ -138,6 +138,13 @@ body {
     margin-bottom: 8px;
 }
 
+.form-label-hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.6;
+}
+
 .resource-select,
 .minutes-input {
     padding: 12px 14px;
