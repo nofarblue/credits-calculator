@@ -660,6 +660,12 @@ body {
     margin-top: 2px;
 }
 
+.v3-rate-note {
+    font-size: 12px;
+    opacity: 0.4;
+    margin-top: 10px;
+}
+
 /* ── Minutes + Add row ────────────────────────────────────────── */
 
 .v3-minutes-row {
