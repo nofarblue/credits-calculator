@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harness Cloud Credits Calculator</title>
+    <title>Harness CI Cloud Calculator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -12,11 +12,8 @@
             <div class="hero-title-row">
                 <h1>Harness Cloud Credits Calculator</h1>
                 <div class="version-toggle">
-                    <button class="version-tab" data-version="v1">v1</button>
-                    <button class="version-tab" data-version="v2">v2</button>
-                    <button class="version-tab" data-version="v3">v3</button>
-                    <button class="version-tab" data-version="v4">v4</button>
-                    <button class="version-tab active" data-version="v5">v5</button>
+                    <button class="version-tab" data-version="v5">v5</button>
+                    <button class="version-tab active" data-version="v6">v6</button>
                 </div>
             </div>
             <p class="hero-subtitle"></p>
@@ -27,312 +24,12 @@
         <div class="container">
 
             <!-- ============================================ -->
-            <!-- V1 / V2 LAYOUT (existing)                    -->
-            <!-- ============================================ -->
-            <div id="layout-v1v2" style="display: none;">
-                <div class="calculator-card">
-                    <div class="calculator-header">
-                        <h2>Configure Your Runners</h2>
-                        <p>Select a resource class, enter your monthly minutes, and add to your estimate</p>
-                    </div>
-
-                    <div class="input-row">
-                        <div class="form-group resource-group">
-                            <label class="form-label">Resource Class</label>
-                            <select id="resource-select" class="resource-select"></select>
-                        </div>
-                        <div class="form-group minutes-group">
-                            <label class="form-label">Monthly Minutes</label>
-                            <input type="number" id="minutes-input" class="minutes-input" placeholder="e.g. 3000" min="0" step="1000" value="1000">
-                        </div>
-                        <div class="form-group btn-group">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="button" id="add-to-estimate" class="add-btn">Add</button>
-                        </div>
-                    </div>
-
-                    <div class="runners-section" id="runners-section" style="display: none;">
-                        <div class="runners-header"><h3>Your Runners</h3></div>
-                        <div class="runners-list" id="runners-list"></div>
-                    </div>
-
-                    <div class="intelligence-section" id="intelligence-section" style="display: none;">
-                        <div class="intelligence-header">
-                            <h3>CI Intelligence Speed Savings</h3>
-                            <p>Harness CI Intelligence features like Test Intelligence, Cache Intelligence, and Build Intelligence can reduce build times by up to 8x. Adjust the slider to estimate your savings. <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">Learn more</a></p>
-                        </div>
-                        <div class="speed-slider">
-                            <div class="slider-row">
-                                <input type="range" id="speed-savings" min="0" max="80" value="30" step="5">
-                                <span class="slider-value" id="speed-value">30%</span>
-                            </div>
-                            <div class="slider-labels">
-                                <span>0% (no optimization)</span>
-                                <span>80% (max savings)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="estimate-total" id="estimate-total" style="display: none;">
-                        <div class="total-row">
-                            <span>Total Credits / month</span>
-                            <span id="total-credits">0</span>
-                        </div>
-                        <div class="total-row savings" id="savings-row" style="display: none;">
-                            <span>CI Intelligence Savings</span>
-                            <span id="savings-credits" class="savings-value"></span>
-                        </div>
-                        <div class="total-row" id="after-savings-row" style="display: none;">
-                            <span>Credits After Savings</span>
-                            <span id="after-savings-credits">0</span>
-                        </div>
-                        <div class="total-row">
-                            <span>Free Credits Included</span>
-                            <span id="free-credits">&minus;2,000</span>
-                        </div>
-                        <div class="total-row credits-to-buy">
-                            <span>Credits to Purchase</span>
-                            <span id="billable-credits">0</span>
-                        </div>
-                        <div class="total-row cost">
-                            <span>Estimated Monthly Cost</span>
-                            <span id="monthly-cost">$0.00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ============================================ -->
-            <!-- V3 LAYOUT                                     -->
-            <!-- ============================================ -->
-            <div id="layout-v3" style="display: none;">
-
-                <!-- Pricing model one-liner -->
-                <p class="v3-model-line">Credit rate &times; monthly build minutes &minus; free credits &minus; CI Intelligence savings = your cost.</p>
-
-                <div class="v3-grid">
-                    <!-- LEFT: Configuration -->
-                    <div class="v3-config">
-
-                        <!-- Step 1 -->
-                        <div class="v3-step">
-                            <div class="v3-step-label"><span class="step-num">1</span> ADD RUNNER TYPES</div>
-
-                            <div class="v3-selector-row">
-                                <div class="v3-field">
-                                    <label class="form-label">OS / ARCHITECTURE</label>
-                                    <div class="v3-tab-group" id="v3-os-tabs">
-                                        <button class="v3-tab active" data-key="linux-amd">Linux x64</button>
-                                        <button class="v3-tab" data-key="linux-arm">Linux ARM64</button>
-                                        <button class="v3-tab" data-key="windows-amd">Windows x64</button>
-                                        <button class="v3-tab" data-key="macos-arm">macOS Apple Silicon</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="v3-field">
-                                <label class="form-label">SIZE</label>
-                                <div class="v3-size-grid" id="v3-size-grid"></div>
-                                <p class="v3-rate-note">Credits and costs shown are per minute of build time.</p>
-                            </div>
-
-                            <div class="v3-minutes-row">
-                                <div class="v3-field v3-minutes-field">
-                                    <label class="form-label">MONTHLY MINUTES</label>
-                                    <input type="number" id="v3-minutes" class="minutes-input" placeholder="e.g. 3000" min="0" step="1000" value="1000">
-                                </div>
-                                <button type="button" id="v3-add" class="add-btn v3-add-btn">Add</button>
-                            </div>
-                        </div>
-
-                        <!-- Runner list -->
-                        <div class="v3-step" id="v3-runners-section" style="display: none;">
-                            <div class="v3-step-label"><span class="step-num">2</span> RUNNER MIX</div>
-                            <div class="v3-runners-list" id="v3-runners-list"></div>
-                        </div>
-
-                        <!-- Step 2: CI Intelligence -->
-                        <div class="v3-step" id="v3-intel-section" style="display: none;">
-                            <div class="v3-step-label"><span class="step-num">3</span> APPLY CI INTELLIGENCE SAVINGS</div>
-                            <p class="v3-intel-desc">Estimated time reduction from Test Intelligence, Cache Intelligence, and Build Intelligence. Actual savings depend on language, test profile, cacheability, and feature adoption. <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">Learn more</a></p>
-
-                            <div class="v3-presets">
-                                <button class="v3-preset" data-pct="10">Conservative (10%)</button>
-                                <button class="v3-preset active" data-pct="30">Typical (30%)</button>
-                                <button class="v3-preset" data-pct="60">Aggressive (60%)</button>
-                            </div>
-
-                            <div class="v3-slider-row">
-                                <input type="range" id="v3-speed-savings" min="0" max="80" value="30" step="5">
-                                <span class="slider-value v3-slider-val" id="v3-speed-value">30%</span>
-                            </div>
-                            <div class="v3-intel-impact" id="v3-intel-impact"></div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT: Summary panel -->
-                    <div class="v3-summary" id="v3-summary">
-                        <div class="v3-summary-header">Monthly Estimate</div>
-                        <div class="v3-summary-hero">
-                            <div class="v3-hero-cost" id="v3-hero-cost">$0.00</div>
-                            <div class="v3-hero-label">estimated monthly cost</div>
-                        </div>
-                        <div class="v3-summary-rows">
-                            <div class="v3-srow">
-                                <span>Total credits</span>
-                                <span id="v3-total-credits">0</span>
-                            </div>
-                            <div class="v3-srow v3-srow-savings" id="v3-savings-row" style="display: none;">
-                                <span>CI Intelligence savings</span>
-                                <span id="v3-savings-credits"></span>
-                            </div>
-                            <div class="v3-srow">
-                                <span>Free credits included</span>
-                                <span id="v3-free-credits">&minus;2,000</span>
-                            </div>
-                            <div class="v3-srow v3-srow-bold">
-                                <span>Credits needed</span>
-                                <span id="v3-billable-credits">0</span>
-                            </div>
-                        </div>
-                        <div class="v3-summary-note">Based on selected runner mix, monthly minutes, and CI Intelligence savings.</div>
-                        <div class="v3-trust-cues">
-                            <span>2,000 free credits/mo</span>
-                            <span>Overages billed monthly</span>
-                            <span>Credits roll over</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ============================================ -->
-            <!-- V4 LAYOUT (polished v3 + marketing copy)     -->
-            <!-- ============================================ -->
-            <div id="layout-v4">
-
-                <!-- Value-oriented subhead -->
-                <p class="v4-subhead">Estimate your monthly CI spend.<br>Pick your runners, set your usage, and see the impact of <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">CI Intelligence</a>.</p>
-
-                <!-- Trust bar -->
-                <div class="v4-trust-bar">
-                    <span>Predictable per-minute pricing</span>
-                    <span>2,000 free credits monthly</span>
-                    <span>No build infrastructure to manage</span>
-                </div>
-
-                <div class="v3-grid">
-                    <!-- LEFT: Configuration -->
-                    <div class="v3-config">
-
-                        <!-- Step 1 -->
-                        <div class="v3-step">
-                            <div class="v3-step-label"><span class="step-num">1</span> CHOOSE YOUR RUNNERS</div>
-
-                            <div class="v3-selector-row">
-                                <div class="v3-field">
-                                    <label class="form-label">OS / ARCHITECTURE</label>
-                                    <div class="v3-tab-group" id="v4-os-tabs">
-                                        <button class="v3-tab active" data-key="linux-amd">Linux x64</button>
-                                        <button class="v3-tab" data-key="linux-arm">Linux ARM64</button>
-                                        <button class="v3-tab" data-key="windows-amd">Windows x64</button>
-                                        <button class="v3-tab" data-key="macos-arm">macOS Apple Silicon</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="v3-field">
-                                <label class="form-label">SIZE</label>
-                                <div class="v4-size-grid" id="v4-size-grid"></div>
-                                <p class="v3-rate-note">Rates shown per build minute.</p>
-                            </div>
-
-                            <div class="v4-minutes-row">
-                                <div class="v3-field v4-minutes-field">
-                                    <label class="form-label">MONTHLY MINUTES</label>
-                                    <input type="number" id="v4-minutes" class="minutes-input" placeholder="e.g. 3000" min="0" step="1000" value="1000">
-                                </div>
-                                <button type="button" id="v4-add" class="add-btn v4-add-btn">Add</button>
-                            </div>
-                        </div>
-
-                        <!-- Runner list -->
-                        <div class="v3-step" id="v4-runners-section" style="display: none;">
-                            <div class="v3-step-label"><span class="step-num">2</span> RUNNER MIX</div>
-                            <div class="v3-runners-list" id="v4-runners-list"></div>
-                        </div>
-
-                        <!-- Step 3: CI Intelligence -->
-                        <div class="v3-step" id="v4-intel-section" style="display: none;">
-                            <div class="v3-step-label"><span class="step-num">3</span> ESTIMATE SAVINGS FROM CI INTELLIGENCE</div>
-                            <p class="v3-intel-desc">See the impact of Test Intelligence, Build Intelligence, and Cache Intelligence on your expected CI spend. Actual savings depend on language, test profile, cacheability, and feature adoption. <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">Learn more</a></p>
-
-                            <div class="v3-presets" id="v4-presets">
-                                <button class="v3-preset" data-pct="10">Conservative (10%)</button>
-                                <button class="v3-preset active" data-pct="30">Typical (30%)</button>
-                                <button class="v3-preset" data-pct="60">Aggressive (60%)</button>
-                            </div>
-
-                            <div class="v3-slider-row">
-                                <input type="range" id="v4-speed-savings" min="0" max="80" value="30" step="5">
-                                <span class="slider-value v3-slider-val" id="v4-speed-value">30%</span>
-                            </div>
-                            <div class="v3-intel-impact" id="v4-intel-impact"></div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT: Summary panel -->
-                    <div class="v3-summary" id="v4-summary">
-                        <div class="v3-summary-header">Monthly Estimate</div>
-                        <div class="v3-summary-hero">
-                            <div class="v3-hero-cost" id="v4-hero-cost">$0.00</div>
-                            <div class="v3-hero-label">estimated monthly cost</div>
-                        </div>
-                        <div class="v3-summary-rows">
-                            <div class="v3-srow">
-                                <span>Total credits</span>
-                                <span id="v4-total-credits">0</span>
-                            </div>
-                            <div class="v3-srow v3-srow-savings" id="v4-savings-row" style="display: none;">
-                                <span>CI Intelligence savings</span>
-                                <span id="v4-savings-credits"></span>
-                            </div>
-                            <div class="v3-srow">
-                                <span>Free credits included</span>
-                                <span id="v4-free-credits">&minus;2,000</span>
-                            </div>
-                            <div class="v3-srow v3-srow-bold">
-                                <span>Credits needed</span>
-                                <span id="v4-billable-credits">0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- v4-specific benefit-led info section -->
-                <div class="info-section">
-                    <div class="info-card">
-                        <h3>Why Harness CI Cloud</h3>
-                        <ul>
-                            <li>Simple, predictable pricing - pay by runner class and usage, per minute</li>
-                            <li>2,000 free credits every month - start building at no cost</li>
-                            <li>No infra management - ephemeral VMs, Harness hosts and maintains everything</li>
-                            <li>Faster builds - CI Intelligence reduces build times up to 8x</li>
-                            <li>SLSA Level 3 ready - isolated, ephemeral builds with no manual VM access</li>
-                            <li>Enterprise-ready - RBAC, governance, OPA policies, OIDC auth, full audit trails</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ============================================ -->
             <!-- V5 LAYOUT (split OS / Architecture)         -->
             <!-- ============================================ -->
             <div id="layout-v5" style="display: none;">
 
-                <!-- Value-oriented subhead -->
                 <p class="v4-subhead">Estimate your monthly CI spend.<br>Pick your runners, set your usage, and see the impact of <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">CI Intelligence</a>.</p>
 
-                <!-- Trust bar -->
                 <div class="v4-trust-bar">
                     <span>Predictable per-minute pricing</span>
                     <span>2,000 free credits monthly</span>
@@ -340,10 +37,8 @@
                 </div>
 
                 <div class="v3-grid">
-                    <!-- LEFT: Configuration -->
                     <div class="v3-config">
 
-                        <!-- Step 1 -->
                         <div class="v3-step">
                             <div class="v3-step-label"><span class="step-num">1</span> CHOOSE YOUR RUNNERS</div>
 
@@ -380,13 +75,11 @@
                             </div>
                         </div>
 
-                        <!-- Runner list -->
                         <div class="v3-step" id="v5-runners-section" style="display: none;">
                             <div class="v3-step-label"><span class="step-num">2</span> RUNNER MIX</div>
                             <div class="v3-runners-list" id="v5-runners-list"></div>
                         </div>
 
-                        <!-- Step 3: CI Intelligence -->
                         <div class="v3-step" id="v5-intel-section" style="display: none;">
                             <div class="v3-step-label"><span class="step-num">3</span> ESTIMATE SAVINGS FROM CI INTELLIGENCE</div>
                             <p class="v3-intel-desc">See the impact of Test Intelligence, Build Intelligence, and Cache Intelligence on your expected CI spend. Actual savings depend on language, test profile, cacheability, and feature adoption. <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">Learn more</a></p>
@@ -405,7 +98,6 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT: Summary panel -->
                     <div class="v3-summary" id="v5-summary">
                         <div class="v3-summary-header">Monthly Estimate</div>
                         <div class="v3-summary-hero">
@@ -433,7 +125,6 @@
                     </div>
                 </div>
 
-                <!-- v5 benefit-led info section -->
                 <div class="info-section">
                     <div class="info-card">
                         <h3>Why Harness CI Cloud</h3>
@@ -449,18 +140,129 @@
                 </div>
             </div>
 
-            <!-- Info (shared by v1/v2/v3) -->
-            <div class="info-section" id="info-shared">
-                <div class="info-card">
-                    <h3>How Credits Work</h3>
-                    <ul>
-                        <li>Each minute of build time consumes credits based on resource class</li>
-                        <li>2,000 free credits per month (don't roll over)</li>
-                        <li>Purchased credits roll over month-to-month</li>
-                        <li>Overage billing available with 30-day payment terms</li>
-                    </ul>
+            <!-- ============================================ -->
+            <!-- V6 LAYOUT (better contrast cards)            -->
+            <!-- ============================================ -->
+            <div id="layout-v6">
+
+                <p class="v4-subhead">Estimate your monthly CI spend.<br>Pick your runners, set your usage, and see the impact of <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">CI Intelligence</a>.</p>
+
+                <div class="v4-trust-bar">
+                    <span>Predictable per-minute pricing</span>
+                    <span>2,000 free credits monthly</span>
+                    <span>No build infrastructure to manage</span>
+                </div>
+
+                <div class="v3-grid">
+                    <div class="v3-config">
+
+                        <div class="v3-step">
+                            <div class="v3-step-label"><span class="step-num">1</span> CHOOSE YOUR RUNNERS</div>
+
+                            <div class="v3-selector-row">
+                                <div class="v3-field">
+                                    <label class="form-label">OS</label>
+                                    <div class="v3-tab-group" id="v6-os-tabs">
+                                        <button class="v3-tab active" data-key="linux">Linux</button>
+                                        <button class="v3-tab" data-key="windows">Windows</button>
+                                        <button class="v3-tab" data-key="macos">macOS</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="v3-selector-row">
+                                <div class="v3-field">
+                                    <label class="form-label">ARCHITECTURE</label>
+                                    <div class="v3-tab-group" id="v6-arch-tabs"></div>
+                                </div>
+                            </div>
+
+                            <div class="v3-field">
+                                <label class="form-label">SIZE</label>
+                                <div class="v6-style-picker" id="v6-style-picker">
+                                    <button class="v6-style-btn active" data-style="A">A</button>
+                                    <button class="v6-style-btn" data-style="B">B</button>
+                                    <button class="v6-style-btn" data-style="C">C</button>
+                                    <button class="v6-style-btn" data-style="D">D</button>
+                                </div>
+                                <div class="v6-size-grid" id="v6-size-grid"></div>
+                                <p class="v3-rate-note">Rates shown per build minute.</p>
+                            </div>
+
+                            <div class="v4-minutes-row">
+                                <div class="v3-field v4-minutes-field">
+                                    <label class="form-label">MONTHLY MINUTES</label>
+                                    <input type="number" id="v6-minutes" class="minutes-input" placeholder="e.g. 3000" min="0" step="1000" value="1000">
+                                </div>
+                                <button type="button" id="v6-add" class="add-btn v4-add-btn">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="v3-step" id="v6-runners-section" style="display: none;">
+                            <div class="v3-step-label"><span class="step-num">2</span> RUNNER MIX</div>
+                            <div class="v3-runners-list" id="v6-runners-list"></div>
+                        </div>
+
+                        <div class="v3-step" id="v6-intel-section" style="display: none;">
+                            <div class="v3-step-label"><span class="step-num">3</span> ESTIMATE SAVINGS FROM CI INTELLIGENCE</div>
+                            <p class="v3-intel-desc">See the impact of Test Intelligence, Build Intelligence, and Cache Intelligence on your expected CI spend. Actual savings depend on language, test profile, cacheability, and feature adoption. <a href="https://developer.harness.io/docs/continuous-integration/use-ci/harness-ci-intelligence/" target="_blank">Learn more</a></p>
+
+                            <div class="v3-presets" id="v6-presets">
+                                <button class="v3-preset" data-pct="10">Conservative (10%)</button>
+                                <button class="v3-preset active" data-pct="30">Typical (30%)</button>
+                                <button class="v3-preset" data-pct="60">Aggressive (60%)</button>
+                            </div>
+
+                            <div class="v3-slider-row">
+                                <input type="range" id="v6-speed-savings" min="0" max="80" value="30" step="5">
+                                <span class="slider-value v3-slider-val" id="v6-speed-value">30%</span>
+                            </div>
+                            <div class="v3-intel-impact" id="v6-intel-impact"></div>
+                        </div>
+                    </div>
+
+                    <div class="v3-summary" id="v6-summary">
+                        <div class="v3-summary-header">Monthly Estimate</div>
+                        <div class="v3-summary-hero">
+                            <div class="v3-hero-cost" id="v6-hero-cost">$0.00</div>
+                            <div class="v3-hero-label">estimated monthly cost</div>
+                        </div>
+                        <div class="v3-summary-rows">
+                            <div class="v3-srow">
+                                <span>Total credits</span>
+                                <span id="v6-total-credits">0</span>
+                            </div>
+                            <div class="v3-srow v3-srow-savings" id="v6-savings-row" style="display: none;">
+                                <span>CI Intelligence savings</span>
+                                <span id="v6-savings-credits"></span>
+                            </div>
+                            <div class="v3-srow">
+                                <span>Free credits included</span>
+                                <span id="v6-free-credits">&minus;2,000</span>
+                            </div>
+                            <div class="v3-srow v3-srow-bold">
+                                <span>Credits needed</span>
+                                <span id="v6-billable-credits">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-card">
+                        <h3>Why Harness CI Cloud</h3>
+                        <ul>
+                            <li>Simple, predictable pricing - pay by runner class and usage, per minute</li>
+                            <li>2,000 free credits every month - start building at no cost</li>
+                            <li>No infra management - ephemeral VMs, Harness hosts and maintains everything</li>
+                            <li>Faster builds - CI Intelligence reduces build times up to 8x</li>
+                            <li>SLSA Level 3 ready - isolated, ephemeral builds with no manual VM access</li>
+                            <li>Enterprise-ready - RBAC, governance, OPA policies, OIDC auth, full audit trails</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
         </div>
     </main>
 
