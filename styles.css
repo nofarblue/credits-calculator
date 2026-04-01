@@ -616,6 +616,8 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 8px;
+    min-height: 184px;
+    align-content: start;
 }
 
 .v3-size-card {
@@ -901,6 +903,8 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 10px;
+    min-height: 220px;
+    align-content: start;
 }
 
 .v4-size-card {

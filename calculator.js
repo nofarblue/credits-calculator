@@ -44,7 +44,7 @@ class HarnessCalculator {
         const groups = {
             linux: { amd: 'Linux / x64', arm: 'Linux / ARM64' },
             windows: { amd: 'Windows / x64' },
-            macos: { arm: 'macOS / Apple Silicon' },
+            macos: { arm: 'macOS / ARM64' },
         };
 
         for (const [os, archs] of Object.entries(RESOURCE_CATALOG)) {
