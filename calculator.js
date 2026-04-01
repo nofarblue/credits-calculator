@@ -5,9 +5,9 @@ class HarnessCalculator {
         this.runners = [];
         this.nextId = 1;
 
-        // Read version from URL hash, default to v1
+        // Read version from URL hash, default to v4
         const hash = window.location.hash.replace('#', '');
-        this.version = ['v1', 'v2', 'v3', 'v4'].includes(hash) ? hash : 'v1';
+        this.version = ['v1', 'v2', 'v3', 'v4'].includes(hash) ? hash : 'v4';
 
         // v3 state
         this.v3Runners = [];
