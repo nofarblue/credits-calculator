@@ -999,10 +999,10 @@ body {
 }
 
 .v4-trust-bar span {
-    font-size: 13px;
-    font-weight: 600;
-    opacity: 0.55;
-    padding-left: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.45;
+    padding-left: 18px;
     position: relative;
 }
 
