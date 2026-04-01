@@ -7,7 +7,7 @@ class HarnessCalculator {
 
         // Read version from URL hash, default to v4
         const hash = window.location.hash.replace('#', '');
-        this.version = ['v1', 'v2', 'v3', 'v4'].includes(hash) ? hash : 'v4';
+        this.version = ['v1', 'v2', 'v3', 'v4', 'v5'].includes(hash) ? hash : 'v5';
 
         // v3 state
         this.v3Runners = [];
@@ -21,6 +21,20 @@ class HarnessCalculator {
         this.v4Os = 'linux-amd';
         this.v4Size = null;
 
+        // v5 state (split OS / Arch)
+        this.v5Runners = [];
+        this.v5NextId = 1;
+        this.v5Os = 'linux';
+        this.v5Arch = 'amd';
+        this.v5Size = null;
+
+        // Valid arch options per OS with display labels
+        this.v5ArchOptions = {
+            linux:   [{ key: 'amd', label: 'x64' }, { key: 'arm', label: 'ARM64' }],
+            windows: [{ key: 'amd', label: 'x64' }],
+            macos:   [{ key: 'arm', label: 'Apple Silicon' }],
+        };
+
         this.init();
     }
 
@@ -29,6 +43,8 @@ class HarnessCalculator {
         this.bindEvents();
         this.v3BuildSizeGrid();
         this.v4BuildSizeGrid();
+        this.v5UpdateArchTabs();
+        this.v5BuildSizeGrid();
 
         // Activate correct version tab and layout on load
         document.querySelectorAll('.version-tab').forEach(t => {
@@ -195,17 +211,88 @@ class HarnessCalculator {
             });
             this.v4UpdateSummary();
         });
+
+        // ── v5 Events ────────────────────────────────────────────
+        // OS tabs (v5)
+        document.getElementById('v5-os-tabs').addEventListener('click', (e) => {
+            const tab = e.target.closest('.v3-tab');
+            if (!tab) return;
+            document.querySelectorAll('#v5-os-tabs .v3-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            this.v5Os = tab.dataset.key;
+            this.v5UpdateArchTabs();
+            this.v5Size = null;
+            this.v5BuildSizeGrid();
+        });
+
+        // Arch tabs (v5)
+        document.getElementById('v5-arch-tabs').addEventListener('click', (e) => {
+            const tab = e.target.closest('.v3-tab');
+            if (!tab || tab.classList.contains('disabled')) return;
+            document.querySelectorAll('#v5-arch-tabs .v3-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            this.v5Arch = tab.dataset.key;
+            this.v5Size = null;
+            this.v5BuildSizeGrid();
+        });
+
+        // Add runner (v5)
+        document.getElementById('v5-add').addEventListener('click', () => this.v5AddRunner());
+        document.getElementById('v5-minutes').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') this.v5AddRunner();
+        });
+
+        // Remove runner (v5)
+        document.getElementById('v5-runners-list').addEventListener('click', (e) => {
+            const btn = e.target.closest('.runner-remove');
+            if (!btn) return;
+            this.v5Runners = this.v5Runners.filter(r => r.id !== parseInt(btn.dataset.id));
+            this.v5RenderRunners();
+        });
+
+        // Preset buttons (v5)
+        document.getElementById('v5-presets').addEventListener('click', (e) => {
+            const btn = e.target.closest('.v3-preset');
+            if (!btn) return;
+            document.querySelectorAll('#v5-presets .v3-preset').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const pct = parseInt(btn.dataset.pct);
+            const v5Slider = document.getElementById('v5-speed-savings');
+            v5Slider.value = pct;
+            document.getElementById('v5-speed-value').textContent = `${pct}%`;
+            this.v5UpdateSummary();
+        });
+
+        // Speed savings slider (v5)
+        const v5Slider = document.getElementById('v5-speed-savings');
+        v5Slider.addEventListener('input', () => {
+            const val = parseInt(v5Slider.value);
+            document.getElementById('v5-speed-value').textContent = `${val}%`;
+            document.querySelectorAll('#v5-presets .v3-preset').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.pct) === val);
+            });
+            this.v5UpdateSummary();
+        });
     }
 
     onVersionChange() {
         const layoutV1V2 = document.getElementById('layout-v1v2');
         const layoutV3 = document.getElementById('layout-v3');
         const layoutV4 = document.getElementById('layout-v4');
+        const layoutV5 = document.getElementById('layout-v5');
         const infoShared = document.getElementById('info-shared');
 
         layoutV1V2.style.display = 'none';
         layoutV3.style.display = 'none';
         layoutV4.style.display = 'none';
+        layoutV5.style.display = 'none';
+
+        if (this.version === 'v5') {
+            layoutV5.style.display = '';
+            infoShared.style.display = 'none';
+            this.v5UpdateSummary();
+            return;
+        }
 
         if (this.version === 'v4') {
             layoutV4.style.display = '';
@@ -646,6 +733,169 @@ class HarnessCalculator {
         } else {
             impact.style.display = 'none';
         }
+    }
+
+    // ── v5 Methods (split OS / Architecture) ────────────────────
+
+    v5UpdateArchTabs() {
+        const container = document.getElementById('v5-arch-tabs');
+        const options = this.v5ArchOptions[this.v5Os] || [];
+
+        // If current arch isn't valid for this OS, pick the first valid one
+        const validKeys = options.map(o => o.key);
+        if (!validKeys.includes(this.v5Arch)) {
+            this.v5Arch = validKeys[0];
+        }
+
+        container.innerHTML = options.map(o =>
+            `<button class="v3-tab${o.key === this.v5Arch ? ' active' : ''}" data-key="${o.key}">${o.label}</button>`
+        ).join('');
+    }
+
+    v5BuildSizeGrid() {
+        const grid = document.getElementById('v5-size-grid');
+        const os = this.v5Os;
+        const arch = this.v5Arch;
+        const sizes = RESOURCE_CATALOG[os]?.[arch] || [];
+
+        grid.innerHTML = sizes.map(s => {
+            const creditsPerMin = s.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
+            const costPerMin = (creditsPerMin * PRICING.COST_PER_CREDIT).toFixed(3);
+            const creditWord = creditsPerMin === 1 ? 'credit' : 'credits';
+            return `
+                <button class="v4-size-card" data-size='${JSON.stringify({ os, arch, ...s })}'>
+                    <span class="v4-size-name">${s.label}</span>
+                    <span class="v4-size-spec">${s.vcpus} vCPU · ${s.ram} GB</span>
+                    <span class="v4-size-rate">${creditsPerMin} ${creditWord} · $${costPerMin}</span>
+                </button>
+            `;
+        }).join('');
+
+        // Auto-select first card
+        const firstCard = grid.querySelector('.v4-size-card');
+        if (firstCard) {
+            firstCard.classList.add('selected');
+            this.v5Size = JSON.parse(firstCard.dataset.size);
+        }
+
+        grid.onclick = (e) => {
+            const card = e.target.closest('.v4-size-card');
+            if (!card) return;
+            grid.querySelectorAll('.v4-size-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            this.v5Size = JSON.parse(card.dataset.size);
+        };
+    }
+
+    v5AddRunner() {
+        if (!this.v5Size) {
+            this.v5FlashError('Select a size first');
+            return;
+        }
+
+        const minutesInput = document.getElementById('v5-minutes');
+        const raw = minutesInput.value.trim();
+
+        if (!raw) { this.v5FlashError('Enter monthly minutes'); return; }
+        if (!/^\d+$/.test(raw)) { this.v5FlashError('Whole numbers only'); return; }
+
+        const minutes = parseInt(raw);
+        if (minutes <= 0) { this.v5FlashError('Must be > 0'); return; }
+
+        const data = this.v5Size;
+        const creditsPerMin = data.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
+        const totalCredits = minutes * creditsPerMin;
+
+        const osLabels = { linux: 'Linux', windows: 'Windows', macos: 'macOS' };
+        const archLabels = { amd: 'x64', arm: 'ARM64' };
+
+        this.v5Runners.push({
+            id: this.v5NextId++,
+            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${data.ram} GB, ${archLabels[data.arch]})`,
+            minutes,
+            creditsPerMin,
+            totalCredits,
+        });
+
+        minutesInput.value = '1000';
+        this.v5RenderRunners();
+    }
+
+    v5RenderRunners() {
+        const section = document.getElementById('v5-runners-section');
+        const intelSection = document.getElementById('v5-intel-section');
+        const list = document.getElementById('v5-runners-list');
+
+        if (this.v5Runners.length === 0) {
+            section.style.display = 'none';
+            intelSection.style.display = 'none';
+            this.v5UpdateSummary();
+            return;
+        }
+
+        section.style.display = '';
+        intelSection.style.display = '';
+
+        list.innerHTML = this.v5Runners.map(r => {
+            const cost = r.totalCredits * PRICING.COST_PER_CREDIT;
+            return `
+                <div class="runner-row">
+                    <div class="runner-info">
+                        <span class="runner-name">${r.displayName}</span>
+                        <span class="runner-detail">${this.fmt(r.minutes)} min · ${this.fmt(r.creditsPerMin)} credits/min</span>
+                    </div>
+                    <div class="runner-cost">
+                        <span class="runner-credits">${this.fmt(r.totalCredits)} credits</span>
+                        <span class="runner-dollars">${this.fmtCurrency(cost)}</span>
+                    </div>
+                    <button class="runner-remove" data-id="${r.id}" title="Remove">&times;</button>
+                </div>
+            `;
+        }).join('');
+
+        this.v5UpdateSummary();
+    }
+
+    v5UpdateSummary() {
+        const totalCredits = this.v5Runners.reduce((sum, r) => sum + r.totalCredits, 0);
+        const savingsPct = parseInt(document.getElementById('v5-speed-savings').value) / 100;
+        const savedCredits = Math.round(totalCredits * savingsPct);
+        const effectiveCredits = totalCredits - savedCredits;
+        const billable = Math.max(0, effectiveCredits - PRICING.FREE_CREDITS_MONTHLY);
+        const cost = billable * PRICING.COST_PER_CREDIT;
+
+        document.getElementById('v5-total-credits').textContent = this.fmt(totalCredits);
+        document.getElementById('v5-hero-cost').textContent = this.fmtCurrency(cost);
+        document.getElementById('v5-free-credits').textContent = `−${this.fmt(PRICING.FREE_CREDITS_MONTHLY)}`;
+        document.getElementById('v5-billable-credits').textContent = this.fmt(billable);
+
+        const savingsRow = document.getElementById('v5-savings-row');
+        if (savedCredits > 0 && totalCredits > 0) {
+            savingsRow.style.display = '';
+            document.getElementById('v5-savings-credits').textContent = `−${this.fmt(savedCredits)}`;
+        } else {
+            savingsRow.style.display = 'none';
+        }
+
+        const impact = document.getElementById('v5-intel-impact');
+        if (totalCredits > 0 && savedCredits > 0) {
+            const savedCost = savedCredits * PRICING.COST_PER_CREDIT;
+            impact.textContent = `Saving ~${this.fmt(savedCredits)} credits (${this.fmtCurrency(savedCost)}/mo)`;
+            impact.style.display = '';
+        } else {
+            impact.style.display = 'none';
+        }
+    }
+
+    v5FlashError(msg) {
+        const btn = document.getElementById('v5-add');
+        const original = btn.textContent;
+        btn.textContent = msg;
+        btn.classList.add('error');
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.classList.remove('error');
+        }, 1500);
     }
 
     v4FlashError(msg) {
