@@ -11,7 +11,7 @@ class HarnessCalculator {
         this.archOptions = {
             linux:   [{ key: 'amd', label: 'x64' }, { key: 'arm', label: 'ARM64' }],
             windows: [{ key: 'amd', label: 'x64' }],
-            macos:   [{ key: 'arm', label: 'Apple Silicon' }],
+            macos:   [{ key: 'arm', label: 'Apple Silicon (M4)' }],
         };
 
         this.init();
@@ -142,7 +142,7 @@ class HarnessCalculator {
         const creditsPerMin = data.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
         const totalCredits = minutes * creditsPerMin;
         const osLabels = { linux: 'Linux', windows: 'Windows', macos: 'macOS' };
-        const archLabels = { amd: 'x64', arm: 'ARM64' };
+        const archLabels = { amd: 'x64', arm: data.os === 'macos' ? 'Apple Silicon' : 'ARM64' };
 
         this.runners.push({
             id: this.nextId++,

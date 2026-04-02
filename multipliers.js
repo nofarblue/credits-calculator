@@ -35,7 +35,8 @@ export const RESOURCE_CATALOG = {
   },
   macos: {
     arm: [
-      { label: 'Medium', vcpus: 6, ram: 14, multiplier: 60 },
+      { label: 'Medium', vcpus: 6, ram: 24, multiplier: 36 },
+      { label: 'Large', vcpus: 12, ram: 48, multiplier: 72 },
     ],
   },
 };
