@@ -142,11 +142,11 @@ class HarnessCalculator {
         const creditsPerMin = data.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
         const totalCredits = minutes * creditsPerMin;
         const osLabels = { linux: 'Linux', windows: 'Windows', macos: 'macOS' };
-        const archLabels = { amd: 'x64', arm: data.os === 'macos' ? 'Apple Silicon' : 'ARM64' };
-
+        const archLabels = { amd: 'x64', arm: 'ARM64' };
+        const archSuffix = data.os === 'linux' ? `, ${archLabels[data.arch]}` : '';
         this.runners.push({
             id: this.nextId++,
-            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU, ${data.ram} GB, ${archLabels[data.arch]})`,
+            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU${archSuffix})`,
             minutes, creditsPerMin, totalCredits,
         });
 
