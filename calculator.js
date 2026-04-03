@@ -103,7 +103,7 @@ class HarnessCalculator {
 
         grid.innerHTML = sizes.map(s => {
             const creditsPerMin = s.multiplier * PRICING.CREDITS_PER_MINUTE_BASE;
-            const costPerMin = (creditsPerMin * PRICING.COST_PER_CREDIT).toFixed(3);
+            const costPerMin = parseFloat((creditsPerMin * PRICING.COST_PER_CREDIT).toFixed(3));
             const creditWord = creditsPerMin === 1 ? 'credit' : 'credits';
             return `
                 <button class="size-card" data-size='${JSON.stringify({ os: this.os, arch: this.arch, ...s })}'>
