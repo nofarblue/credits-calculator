@@ -348,6 +348,13 @@ body {
     text-overflow: ellipsis;
 }
 
+.runner-meta {
+    font-weight: 400;
+    opacity: 0.45;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
 .runner-detail {
     font-size: 12px;
     opacity: 0.5;

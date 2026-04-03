@@ -146,7 +146,8 @@ class HarnessCalculator {
         const archSuffix = data.os === 'linux' ? `, ${archLabels[data.arch]}` : '';
         this.runners.push({
             id: this.nextId++,
-            displayName: `${osLabels[data.os]} ${data.label} (${data.vcpus} vCPU${archSuffix})`,
+            displayLabel: `${osLabels[data.os]} ${data.label}`,
+            displayMeta: `${data.vcpus} vCPU${archSuffix}`,
             minutes, creditsPerMin, totalCredits,
         });
 
@@ -174,7 +175,7 @@ class HarnessCalculator {
             return `
                 <div class="runner-row">
                     <div class="runner-info">
-                        <span class="runner-name">${r.displayName}</span>
+                        <span class="runner-name">${r.displayLabel} <span class="runner-meta">(${r.displayMeta})</span></span>
                         <span class="runner-detail">${this.fmt(r.minutes)} min · ${this.fmt(r.creditsPerMin)} credits/min</span>
                     </div>
                     <div class="runner-cost">
